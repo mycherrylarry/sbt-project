@@ -4,3 +4,6 @@
 project/project/*
 project/target/*
 target/*
+stream-server/target/*
+test/target/*
+infrastructure/target/*
