@@ -38,6 +38,19 @@ object ServerBuild extends Build with Dependencies {
     )
   ) dependsOn (test % "test")
 
+  lazy val server = Project(
+    id = "msg-server",
+    base = file("msg-server"),
+    settings = commonSettings ++ Seq(
+      name := "msg-server",
+      organization := "net.cherry",
+      libraryDependencies ++= Seq(
+        finagleHttp,
+        finagleStream
+      )
+    )
+  ) dependsOn(infrastructure, domain, test % "test") aggregate(infrastructure, domain)
+
   lazy val streamServer = Project(
     id = "msg-stream-server",
     base = file("msg-stream-server"),
@@ -49,7 +62,7 @@ object ServerBuild extends Build with Dependencies {
         finagleStream
       )
     )
-  ) dependsOn(infrastructure, domain, test % "test") aggregate(infrastructure, domain)
+  ) dependsOn(infrastructure, domain, server, test % "test") aggregate(infrastructure, server, domain)
 
   lazy val apiServer = Project(
     id = "msg-api-server",
@@ -60,7 +73,7 @@ object ServerBuild extends Build with Dependencies {
       libraryDependencies ++= Seq(
       )
     )
-  ) dependsOn(infrastructure, domain, test % "test") aggregate(infrastructure, domain)
+  ) dependsOn(infrastructure, domain, server, test % "test") aggregate(infrastructure, server, domain)
 
   lazy val eventBus = Project(
     id = "msg-event-bus",
@@ -71,6 +84,7 @@ object ServerBuild extends Build with Dependencies {
       libraryDependencies ++= Seq(
       )
     )
-  ) dependsOn(infrastructure, domain, test % "test") aggregate(infrastructure, domain)
+  ) dependsOn(infrastructure, domain, server, test % "test") aggregate(infrastructure, server, domain)
+
 
 }
