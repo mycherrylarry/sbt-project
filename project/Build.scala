@@ -36,7 +36,7 @@ object ServerBuild extends Build with Dependencies {
       libraryDependencies ++= Seq(
       )
     )
-  ) dependsOn (test % "test")
+  ) dependsOn (infrastructure, test % "test") aggregate(infrastructure)
 
   lazy val server = Project(
     id = "msg-server",
