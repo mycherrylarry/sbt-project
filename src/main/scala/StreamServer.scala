@@ -1,68 +1,28 @@
-import com.twitter.concurrent.{Broker, Offer}
-import com.twitter.finagle.builder.{Server, ServerBuilder}
-import com.twitter.finagle.Service
-import com.twitter.finagle.stream.{Stream, StreamResponse}
-import com.twitter.util.{Future, Timer, JavaTimer}
 import com.twitter.conversions.time._
+import com.twitter.finagle.builder.{Server, ServerBuilder}
+import com.twitter.finagle.stream.Stream
+import com.twitter.util.{Timer, JavaTimer}
 import java.net.InetSocketAddress
-import org.jboss.netty.buffer.ChannelBuffer
-import org.jboss.netty.buffer.ChannelBuffers.copiedBuffer
-import org.jboss.netty.handler.codec.http.{DefaultHttpResponse, HttpRequest, HttpResponseStatus}
 import scala.util.Random
 
 /**
  * An example of a streaming server using HTTP Chunking. The Stream
  * Codec uses HTTP Chunks and newline delimited items.
  */
-object StreamServer extends EventHandler {
-  // "tee" messages across all of the registered brokers.
-  val addBroker = new Broker[Broker[ChannelBuffer]]
-  val remBroker = new Broker[Broker[ChannelBuffer]]
-  val messages = new Broker[ChannelBuffer]
-  private[this] def tee(receivers: Set[Broker[ChannelBuffer]]) {
-    Offer.select(
-      addBroker.recv { b => tee(receivers + b) },
-      remBroker.recv { b => tee(receivers - b) },
-      if (receivers.isEmpty) Offer.never else {
-        messages.recv { m =>
-          Future.join(receivers map { _ ! m } toSeq) ensure tee(receivers)
-        }
-      }
-    )
-  }
-
-  // start the process.
-  tee(Set())
-
-  // callback function
-  def handleEvent(event: String) {
-    messages.send(copiedBuffer(event.getBytes()))
-  }
+object StreamServer {
 
   def main(args: Array[String]) {
-    val myService = new Service[HttpRequest, StreamResponse] {
-      def apply(request: HttpRequest) = Future {
-        val subscriber = new Broker[ChannelBuffer]
-        addBroker ! subscriber
-        new StreamResponse {
-          val httpResponse = new DefaultHttpResponse(
-            request.getProtocolVersion, HttpResponseStatus.OK)
-          def messages = subscriber.recv
-          def error = new Broker[Throwable].recv
-          def release() = {
-            remBroker ! subscriber
-            // sink any existing messages, so they
-            // don't hold up the upstream.
-            subscriber.recv foreach { _ => () }
-          }
-        }
-      }
-    }
+
+    val streamService = StreamService()
+
+    val eventPublisher = EventPublisher(streamService)
 
     val server: Server = ServerBuilder()
       .codec(Stream())
       .bindTo(new InetSocketAddress(8081))
       .name("streamserver")
-      .build(myService)
+      .build(streamService)
+
+
   }
 }

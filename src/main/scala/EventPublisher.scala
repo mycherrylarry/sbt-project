@@ -1,4 +1,5 @@
-object EventPublisher {
-  val subscriber: EventHandler
-  def apply()
+case class EventPublisher(eventHandler: EventHandler) {
+  def publish(message: String) {
+    eventHandler.handleEvent(message)
+  }
 }
