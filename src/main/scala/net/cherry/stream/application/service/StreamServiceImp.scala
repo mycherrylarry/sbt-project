@@ -1,12 +1,12 @@
+package net.cherry.stream.application.service
+
 import com.twitter.concurrent.{Broker, Offer}
-import org.jboss.netty.handler.codec.http.{HttpHeaders, DefaultHttpResponse, HttpResponseStatus}
-import com.twitter.conversions.time._
 import com.twitter.finagle.stream.StreamResponse
 import com.twitter.util._
 import org.jboss.netty.buffer.ChannelBuffer
 import org.jboss.netty.buffer.ChannelBuffers.copiedBuffer
-import org.jboss.netty.handler.codec.http.{DefaultHttpResponse, HttpRequest, HttpResponseStatus}
-import scala.util.{Random}
+import org.jboss.netty.handler.codec.http.HttpRequest
+import org.jboss.netty.handler.codec.http.{HttpHeaders, DefaultHttpResponse, HttpResponseStatus}
 
 class StreamServiceImp extends StreamService {
   // "tee" messages across all of the registered brokers.
@@ -37,18 +37,9 @@ class StreamServiceImp extends StreamService {
   // start the process.
   tee(Set())
 
-  def produce(r: Random, t: Timer) {
-    t.schedule(1.second.fromNow) {
-      val m = copiedBuffer((r.nextInt.toString + "\n").getBytes())
-      messages.send(m) andThen produce(r, t)
-    }
-  }
-
-  //produce(new Random, new JavaTimer)
-
   // callback function
-  def handleEvent(event: String) {
-    messages.send(copiedBuffer(event.getBytes()))
+  def handleEvent(event: String): Offer[Unit] = {
+    messages.send(copiedBuffer((event + " \r\n").getBytes()))
   }
 
   def apply(request: HttpRequest): Future[StreamResponse] = {
@@ -56,7 +47,9 @@ class StreamServiceImp extends StreamService {
       val subscriber = new Broker[ChannelBuffer]
 
       addBroker ! subscriber
-      subscriber.send(copiedBuffer("hello ".getBytes())).sync()
+
+      // \r\n is needed when sending message
+      subscriber.send(copiedBuffer("you've connected to the server \r\n".getBytes())).sync()
 
       new StreamResponse {
         val httpResponse = {

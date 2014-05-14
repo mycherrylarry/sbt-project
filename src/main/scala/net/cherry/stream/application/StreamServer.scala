@@ -1,9 +1,12 @@
+package net.cherry.stream.application
+
 import com.twitter.conversions.time._
 import com.twitter.finagle.builder.{Server, ServerBuilder}
 import com.twitter.finagle.stream.Stream
 import com.twitter.util.{Timer, JavaTimer}
 import java.net.InetSocketAddress
-import scala.util.Random
+import net.cherry.stream.application.infrastructure.EventPublisher
+import net.cherry.stream.application.service.StreamService
 
 /**
  * An example of a streaming server using HTTP Chunking. The Stream
@@ -19,10 +22,18 @@ object StreamServer {
 
     val server: Server = ServerBuilder()
       .codec(Stream())
-      .bindTo(new InetSocketAddress(8081))
+      .bindTo(new InetSocketAddress(8079))
       .name("streamserver")
       .build(streamService)
 
+    val timer = new JavaTimer()
+    def test(timer: Timer) {
+      timer.schedule(1.second.fromNow) {
+        eventPublisher.publish("ping message...") andThen test(timer)
+      }
+    }
+
+    test(timer)
 
   }
 }
