@@ -6,10 +6,10 @@ object ServerBuild extends Build with Dependencies {
   lazy val commonSettings = Project.defaultSettings
 
   lazy val test = Project(
-    id = "test",
-    base = file("test"),
+    id = "msg-test",
+    base = file("msg-test"),
     settings = commonSettings ++ Seq(
-      name := "test",
+      name := "msg-test",
       organization := "net.cherry",
       libraryDependencies ++= Seq(
       )
@@ -17,10 +17,10 @@ object ServerBuild extends Build with Dependencies {
   )
 
   lazy val infrastructure = Project(
-    id = "infrastructure",
-    base = file("infrastructure"),
+    id = "msg-infrastructure",
+    base = file("msg-infrastructure"),
     settings = commonSettings ++ Seq(
-      name := "infrastructure",
+      name := "msg-infrastructure",
       organization := "net.cherry",
       libraryDependencies ++= Seq(
       )
@@ -28,21 +28,21 @@ object ServerBuild extends Build with Dependencies {
   ) dependsOn (test % "test")
 
   lazy val domain = Project(
-    id = "domain",
-    base = file("domain"),
+    id = "msg-domain",
+    base = file("msg-domain"),
     settings = commonSettings ++ Seq(
-      name := "domain",
+      name := "msg-domain",
       organization := "net.cherry",
       libraryDependencies ++= Seq(
       )
     )
   ) dependsOn (test % "test")
 
-  lazy val streamServer = Project(
-    id = "stream-server",
-    base = file("stream-server"),
+  lazy val server = Project(
+    id = "msg-server",
+    base = file("msg-server"),
     settings = commonSettings ++ Seq(
-      name := "stream-server",
+      name := "msg-server",
       organization := "net.cherry",
       libraryDependencies ++= Seq(
         finagleHttp,
@@ -51,26 +51,40 @@ object ServerBuild extends Build with Dependencies {
     )
   ) dependsOn(infrastructure, domain, test % "test") aggregate(infrastructure, domain)
 
-  lazy val apiServer = Project(
-    id = "api-server",
-    base = file("api-server"),
+  lazy val streamServer = Project(
+    id = "msg-stream-server",
+    base = file("msg-stream-server"),
     settings = commonSettings ++ Seq(
-      name := "api-server",
+      name := "msg-stream-server",
+      organization := "net.cherry",
+      libraryDependencies ++= Seq(
+        finagleHttp,
+        finagleStream
+      )
+    )
+  ) dependsOn(infrastructure, domain, server, test % "test") aggregate(infrastructure, server, domain)
+
+  lazy val apiServer = Project(
+    id = "msg-api-server",
+    base = file("msg-api-server"),
+    settings = commonSettings ++ Seq(
+      name := "msg-api-server",
       organization := "net.cherry",
       libraryDependencies ++= Seq(
       )
     )
-  ) dependsOn(infrastructure, domain, test % "test") aggregate(infrastructure, domain)
+  ) dependsOn(infrastructure, domain, server, test % "test") aggregate(infrastructure, server, domain)
 
   lazy val eventBus = Project(
-    id = "event-bus",
-    base = file("event-bus"),
+    id = "msg-event-bus",
+    base = file("msg-event-bus"),
     settings = commonSettings ++ Seq(
-      name := "event-bus",
+      name := "msg-event-bus",
       organization := "net.cherry",
       libraryDependencies ++= Seq(
       )
     )
-  ) dependsOn(infrastructure, domain, test % "test") aggregate(infrastructure, domain)
+  ) dependsOn(infrastructure, domain, server, test % "test") aggregate(infrastructure, server, domain)
+
 
 }

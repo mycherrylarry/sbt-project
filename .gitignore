@@ -4,9 +4,10 @@
 project/project/*
 project/target/*
 target/*
-stream-server/target/*
-test/target/*
-infrastructure/target/*
-domain/target/*
-event-bus/target/*
-api-server/target/*
+msg-stream-server/target/*
+msg-test/target/*
+msg-infrastructure/target/*
+msg-domain/target/*
+msg-event-bus/target/*
+msg-api-server/target/*
+msg-server/target/*

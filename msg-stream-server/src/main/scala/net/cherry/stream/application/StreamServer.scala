@@ -5,7 +5,7 @@ import com.twitter.finagle.builder.{Server, ServerBuilder}
 import com.twitter.finagle.stream.Stream
 import com.twitter.util.{Timer, JavaTimer}
 import java.net.InetSocketAddress
-import net.cherry.stream.application.infrastructure.EventPublisher
+import net.cherry.server.infrastructure.EventPublisher
 import net.cherry.stream.application.service.StreamService
 
 /**
