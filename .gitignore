@@ -7,3 +7,6 @@ target/*
 stream-server/target/*
 test/target/*
 infrastructure/target/*
+domain/target/*
+event-bus/target/*
+api-server/target/*
