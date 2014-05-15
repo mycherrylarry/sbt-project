@@ -44,6 +44,7 @@ object ServerBuild extends Build with Dependencies {
     settings = commonSettings ++ Seq(
       name := "msg-server",
       organization := "net.cherry",
+      resolvers += "twitter" at "http://maven.twttr.com",
       libraryDependencies ++= Seq(
         finagleHttp,
         finagleStream
