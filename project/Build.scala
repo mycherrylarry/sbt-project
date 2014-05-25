@@ -44,10 +44,11 @@ object ServerBuild extends Build with Dependencies {
     settings = commonSettings ++ Seq(
       name := "msg-server",
       organization := "net.cherry",
-      resolvers += "twitter" at "http://maven.twttr.com",
+      resolvers ++= commonResolvers,
       libraryDependencies ++= Seq(
         finagleHttp,
-        finagleStream
+        finagleStream,
+        akka
       )
     )
   ) dependsOn(infrastructure, domain, test % "test") aggregate(infrastructure, domain)
@@ -58,9 +59,11 @@ object ServerBuild extends Build with Dependencies {
     settings = commonSettings ++ Seq(
       name := "msg-stream-server",
       organization := "net.cherry",
+      resolvers ++= commonResolvers,
       libraryDependencies ++= Seq(
         finagleHttp,
-        finagleStream
+        finagleStream,
+        akka
       )
     )
   ) dependsOn(infrastructure, domain, server, test % "test") aggregate(infrastructure, server, domain)
@@ -71,7 +74,11 @@ object ServerBuild extends Build with Dependencies {
     settings = commonSettings ++ Seq(
       name := "msg-api-server",
       organization := "net.cherry",
+      resolvers ++= commonResolvers,
       libraryDependencies ++= Seq(
+        finagleHttp,
+        finagleStream,
+        akka
       )
     )
   ) dependsOn(infrastructure, domain, server, test % "test") aggregate(infrastructure, server, domain)
@@ -82,7 +89,11 @@ object ServerBuild extends Build with Dependencies {
     settings = commonSettings ++ Seq(
       name := "msg-event-bus",
       organization := "net.cherry",
+      resolvers ++= commonResolvers,
       libraryDependencies ++= Seq(
+        finagleHttp,
+        finagleStream,
+        akka
       )
     )
   ) dependsOn(infrastructure, domain, server, test % "test") aggregate(infrastructure, server, domain)
