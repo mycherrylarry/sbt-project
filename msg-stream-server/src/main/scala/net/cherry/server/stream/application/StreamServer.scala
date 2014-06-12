@@ -1,4 +1,4 @@
-package net.cherry.stream.application
+package net.cherry.server.stream.application
 
 import com.twitter.conversions.time._
 import com.twitter.finagle.builder.{Server, ServerBuilder}

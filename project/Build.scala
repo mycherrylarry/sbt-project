@@ -78,7 +78,9 @@ object ServerBuild extends Build with Dependencies {
       libraryDependencies ++= Seq(
         finagleHttp,
         finagleStream,
-        akka
+        akka,
+        sprayCan,
+        sprayRouting
       )
     )
   ) dependsOn(infrastructure, domain, server, test % "test") aggregate(infrastructure, server, domain)

@@ -1,4 +1,4 @@
-package net.cherry.stream.application
+package net.cherry.server.stream.application
 
 import akka.actor.{Props, ActorSystem, Actor}
 
