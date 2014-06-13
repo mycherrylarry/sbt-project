@@ -13,11 +13,20 @@ class Router extends Actor with MyService {
 
 trait MyService extends HttpService {
   val myRoute =
-    path("/a") {
+    path("") {
       get {
-        respondWithMediaType(`text/html`) {
+        respondWithStatus(StatusCodes.OK) {
           complete {
             "hello world"
+          }
+        }
+      }
+    } ~
+    path("ticket") {
+      get {
+        respondWithStatus(StatusCodes.OK) {
+          complete {
+            "hi"
           }
         }
       }
