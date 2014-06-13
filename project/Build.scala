@@ -3,7 +3,9 @@ import Keys._
 
 object ServerBuild extends Build with Dependencies {
 
-  lazy val commonSettings = Project.defaultSettings
+  lazy val commonSettings = Project.defaultSettings ++ Seq(
+    scalaVersion := "2.10.3"
+  )
 
   lazy val test = Project(
     id = "msg-test",

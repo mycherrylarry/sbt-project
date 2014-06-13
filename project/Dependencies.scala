@@ -9,7 +9,7 @@ trait Dependencies {
   val akkaVersion = "2.1.4"
   val akka = "com.typesafe.akka" %% "akka-actor" % akkaVersion
 
-  val sprayVersion = "1.0.1"
+  val sprayVersion = "1.1.1"
   val sprayCan = "io.spray" % "spray-can" % sprayVersion
   val sprayRouting = "io.spray" % "spray-routing" % sprayVersion
   val sprayTest = "io.spray" % "spray-testkit" % sprayVersion
