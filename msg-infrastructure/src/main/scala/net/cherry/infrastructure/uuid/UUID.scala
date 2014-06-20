@@ -1,7 +1,9 @@
 package net.cherry.infrastructure.uuid
 
-trait UUID
+trait UUID {
+  val value: String
+}
 
 object UUID extends UUID {
-  def value = java.util.UUID.randomUUID().toString
+  val value = java.util.UUID.randomUUID().toString
 }

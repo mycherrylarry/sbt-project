@@ -13,6 +13,8 @@ trait Dependencies {
   val sprayCan = "io.spray" % "spray-can" % sprayVersion
   val sprayRouting = "io.spray" % "spray-routing" % sprayVersion
   val sprayTest = "io.spray" % "spray-testkit" % sprayVersion
+  val sprayJson = "io.spray" %%  "spray-json" % "1.2.5"
+
 
   val commonResolvers = Seq(
     "twitter" at "http://maven.twttr.com",

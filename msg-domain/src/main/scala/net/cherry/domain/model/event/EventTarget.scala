@@ -6,6 +6,6 @@ object EventTargetType extends Enumeration {
   val USER, CONVERSATION, SYSTEM = Value
 }
 
-case class EventTarget(target: EventTargetType.Value, id: UUID)
+case class EventTarget(targetType: EventTargetType.Value, id: UUID)
 
 

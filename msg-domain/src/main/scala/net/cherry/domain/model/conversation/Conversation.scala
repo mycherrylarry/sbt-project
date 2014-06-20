@@ -2,7 +2,13 @@ package net.cherry.domain.model.conversation
 
 import net.cherry.infrastructure.uuid.{StatusType, UUID, Entity}
 
-case class ConversationId() extends UUID
+trait ConversationId extends UUID
+
+object ConversationId {
+  def apply(v: String): ConversationId = new ConversationId {
+    val value: String = v
+  }
+}
 
 trait Conversation extends Entity[ConversationId] {
   val name: String
@@ -15,6 +21,6 @@ trait Conversation extends Entity[ConversationId] {
 
 object Conversation {
   def apply
-  (id: ConversationId, status: StatusType.Value, name: String) =
+  (id: ConversationId, status: StatusType.Value, name: String): Conversation =
     new ConversationImpl(id, status, name)
 }

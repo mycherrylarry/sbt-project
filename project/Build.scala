@@ -13,6 +13,7 @@ object ServerBuild extends Build with Dependencies {
     settings = commonSettings ++ Seq(
       name := "msg-test",
       organization := "net.cherry",
+      resolvers ++= commonResolvers,
       libraryDependencies ++= Seq(
       )
     )
@@ -24,6 +25,7 @@ object ServerBuild extends Build with Dependencies {
     settings = commonSettings ++ Seq(
       name := "msg-infrastructure",
       organization := "net.cherry",
+      resolvers ++= commonResolvers,
       libraryDependencies ++= Seq(
       )
     )
@@ -35,7 +37,9 @@ object ServerBuild extends Build with Dependencies {
     settings = commonSettings ++ Seq(
       name := "msg-domain",
       organization := "net.cherry",
+      resolvers ++= commonResolvers,
       libraryDependencies ++= Seq(
+        sprayJson
       )
     )
   ) dependsOn (infrastructure, test % "test") aggregate(infrastructure)
@@ -50,7 +54,8 @@ object ServerBuild extends Build with Dependencies {
       libraryDependencies ++= Seq(
         finagleHttp,
         finagleStream,
-        akka
+        akka,
+        sprayJson
       )
     )
   ) dependsOn(infrastructure, domain, test % "test") aggregate(infrastructure, domain)
@@ -65,7 +70,8 @@ object ServerBuild extends Build with Dependencies {
       libraryDependencies ++= Seq(
         finagleHttp,
         finagleStream,
-        akka
+        akka,
+        sprayJson
       )
     )
   ) dependsOn(infrastructure, domain, server, test % "test") aggregate(infrastructure, server, domain)
@@ -82,7 +88,8 @@ object ServerBuild extends Build with Dependencies {
         finagleStream,
         akka,
         sprayCan,
-        sprayRouting
+        sprayRouting,
+        sprayJson
       )
     )
   ) dependsOn(infrastructure, domain, server, test % "test") aggregate(infrastructure, server, domain)
@@ -97,7 +104,8 @@ object ServerBuild extends Build with Dependencies {
       libraryDependencies ++= Seq(
         finagleHttp,
         finagleStream,
-        akka
+        akka,
+        sprayJson
       )
     )
   ) dependsOn(infrastructure, domain, server, test % "test") aggregate(infrastructure, server, domain)
