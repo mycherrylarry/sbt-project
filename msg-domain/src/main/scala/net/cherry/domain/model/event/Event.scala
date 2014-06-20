@@ -1,14 +1,15 @@
 package net.cherry.domain.model.event
 
-import net.cherry.infrastructure.uuid.UUID
+import net.cherry.infrastructure.uuid.{StatusType, UUID, Entity}
 
+case class EventId() extends UUID
 
-trait Event {
-  val id: UUID
+trait Event extends Entity[EventId] {
 }
 
 object Event {
-  def apply(id: UUID) =
-    new EventImpl(id)
+  def apply
+  (id: EventId, status: StatusType.Value) =
+    new EventImpl(id, status)
 }
 

@@ -1,7 +1,8 @@
 package net.cherry.domain.model.event
 
-import net.cherry.infrastructure.uuid.UUID
+import net.cherry.infrastructure.uuid.StatusType
 
 class EventImpl
-(val id: UUID)
+(val id: EventId,
+ val status: StatusType.Value)
   extends Event
