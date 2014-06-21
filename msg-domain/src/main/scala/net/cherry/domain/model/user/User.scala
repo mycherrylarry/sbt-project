@@ -2,13 +2,7 @@ package net.cherry.domain.model.user
 
 import net.cherry.infrastructure.uuid.{StatusType, UUID, Entity}
 
-trait UserId extends UUID
-
-object UserId {
-  def apply(v: String) = new UserId {
-    val value: String = v
-  }
-}
+case class UserId(value: UUID)
 
 trait User extends Entity[UserId] {
 

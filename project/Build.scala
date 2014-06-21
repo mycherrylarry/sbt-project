@@ -56,7 +56,8 @@ object ServerBuild extends Build with Dependencies {
         finagleHttp,
         finagleStream,
         akka,
-        sprayJson
+        sprayJson,
+        scalaRedis
       )
     )
   ) dependsOn(infrastructure, domain, test % "test") aggregate(infrastructure, domain)
