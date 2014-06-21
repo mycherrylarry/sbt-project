@@ -39,7 +39,8 @@ object ServerBuild extends Build with Dependencies {
       organization := "net.cherry",
       resolvers ++= commonResolvers,
       libraryDependencies ++= Seq(
-        sprayJson
+        sprayJson,
+        scalaRedis
       )
     )
   ) dependsOn (infrastructure, test % "test") aggregate(infrastructure)
@@ -105,7 +106,8 @@ object ServerBuild extends Build with Dependencies {
         finagleHttp,
         finagleStream,
         akka,
-        sprayJson
+        sprayJson,
+        scalaRedis
       )
     )
   ) dependsOn(infrastructure, domain, server, test % "test") aggregate(infrastructure, server, domain)

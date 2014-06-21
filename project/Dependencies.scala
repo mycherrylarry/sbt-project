@@ -15,6 +15,9 @@ trait Dependencies {
   val sprayTest = "io.spray" % "spray-testkit" % sprayVersion
   val sprayJson = "io.spray" %%  "spray-json" % "1.2.5"
 
+  val scalaRedisVersion = "2.11"
+  val scalaRedis = "net.debasishg" % "redisclient_2.10" % scalaRedisVersion
+
 
   val commonResolvers = Seq(
     "twitter" at "http://maven.twttr.com",
