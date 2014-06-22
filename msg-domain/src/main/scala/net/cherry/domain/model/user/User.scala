@@ -12,6 +12,8 @@ trait User extends Entity[UserId] {
   (id: UserId = this.id,
    status: StatusType.Value = this.status,
    name: String = this.name) = new UserImpl(id, status, name)
+
+  override def toString = s"User(id = $id, status = $status, name = $name)"
 }
 
 object User {

@@ -11,6 +11,8 @@ trait Conversation extends Entity[ConversationId] {
   (id: ConversationId = this.id,
    status: StatusType.Value = this.status,
    name: String = this.name) = new ConversationImpl(id, status, name)
+
+  override def toString = s"Conversation(id = $id, status = $status, name = $name)"
 }
 
 object Conversation {

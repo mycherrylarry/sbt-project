@@ -12,20 +12,20 @@ class EventQueueOfRedisImpl
 (val redisClient: RedisClient)
   extends EventQueueOfRedis {
 
+  implicit val parseEvent = Parse[Event] {
+    e =>
+      val json = new String(e, "UTF-8")
+      JsonParser(json).convertTo[Event]
+  }
+
   def enqueue(event: Event): Future[Unit] = future {
+    println("enqueue")
     redisClient.lpush("event-json", event.toJson)
   }
 
-  def dequeue: Future[Event] = future {
-    // TODO: fix bug
-
-    implicit val parseEvent = Parse[Event] {
-      e =>
-        val json = new String(e, "UTF-8")
-        JsonParser(json).convertTo[Event]
-    }
-
-    redisClient.rpop[Event]("event-json").get
+  def dequeue: Future[Option[Event]] = future {
+    println("dequeue")
+    redisClient.rpop[Event]("event-json")
   }
 }
 

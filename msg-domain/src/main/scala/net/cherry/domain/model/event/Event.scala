@@ -16,6 +16,8 @@ trait Event extends Entity[EventId] {
    contentType: EventContentType.Value = this.contentType,
    content: EventContent = this.content) =
     new EventImpl(id, status, target, contentType, content)
+
+  override def toString = s"Event(id = $id, status = $status, target = $target, contentType = $contentType, content = $content)"
 }
 
 object Event {

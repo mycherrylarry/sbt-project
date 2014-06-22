@@ -3,7 +3,7 @@ package net.cherry.domain.infrastructure.json
 import spray.json._
 import net.cherry.domain.model.event._
 import net.cherry.infrastructure.uuid.{UUID, StatusType}
-import net.cherry.domain.model.conversation.ConversationId
+import net.cherry.domain.infrastructure.json.EventContentJsonProtocol._
 
 object EventJsonProtocol extends DefaultJsonProtocol {
 
@@ -22,7 +22,15 @@ object EventJsonProtocol extends DefaultJsonProtocol {
   }
 
   implicit object EventJsonFormat extends RootJsonFormat[Event] {
-    def write(obj: Event) =
+    def write(obj: Event) = {
+      val content = obj.content match {
+        case ConversationCreateEventContent(_) =>
+          obj.content.asInstanceOf[ConversationCreateEventContent].toJson
+        case ConversationJoinEventContent(_) =>
+          obj.content.asInstanceOf[ConversationJoinEventContent].toJson
+        case MessageSendEventContent(_, _) =>
+          obj.content.asInstanceOf[MessageSendEventContent].toJson
+      }
       JsObject(
         "identity" -> JsString(obj.id.value.toString()),
         "status" -> JsNumber(obj.status.id),
@@ -31,18 +39,25 @@ object EventJsonProtocol extends DefaultJsonProtocol {
           "identity" -> JsString(obj.target.id.toString())
         ),
         "content_type" -> JsNumber(obj.contentType.id),
-        // TODO: complement
-        "content" -> JsString("content")
+        "content" -> content
       )
+    }
 
     def read(value: JsValue) = value.asJsObject.getFields("identity", "status", "target", "content_type", "content") match {
-      case Seq(JsString(id), JsNumber(status), target, JsNumber(contentType), JsString(content)) =>
+      case Seq(JsString(id), JsNumber(status), target, JsNumber(contentType), content) =>
         Event(
           id = EventId(UUID(id)),
           status = StatusType(status.toInt),
           target = target.convertTo[EventTarget],
           contentType = EventContentType(contentType.toInt),
-          content = MessageSendEventContent(content)
+          content = EventContentType(contentType.toInt) match {
+            case EventContentType.CONVERSATION_CREATE =>
+              content.convertTo[ConversationCreateEventContent]
+            case EventContentType.CONVERSATION_JOIN =>
+              content.convertTo[ConversationJoinEventContent]
+            case EventContentType.MESSAGE_SEND =>
+              content.convertTo[MessageSendEventContent]
+          }
         )
       case _ => deserializationError("Event Expected")
     }

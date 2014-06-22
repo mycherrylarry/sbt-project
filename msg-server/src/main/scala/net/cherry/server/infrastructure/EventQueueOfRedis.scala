@@ -7,7 +7,7 @@ import scala.concurrent.Future
 trait EventQueueOfRedis {
   def enqueue(event: Event): Future[Unit]
 
-  def dequeue: Future[Event]
+  def dequeue: Future[Option[Event]]
 }
 
 object EventQueueOfRedis {

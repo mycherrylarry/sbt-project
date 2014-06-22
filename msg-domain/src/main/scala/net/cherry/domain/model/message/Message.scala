@@ -11,6 +11,8 @@ trait Message extends Entity[MessageId] {
   (id: MessageId = this.id,
    status: StatusType.Value = this.status,
    content: Array[Byte] = this.content) = new MessageImpl(id, status, content)
+
+  override def toString = s"Message(id = $id, status = $status, content = $content)"
 }
 
 object Message {
