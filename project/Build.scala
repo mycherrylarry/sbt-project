@@ -3,7 +3,9 @@ import Keys._
 
 object ServerBuild extends Build with Dependencies {
 
-  lazy val commonSettings = Project.defaultSettings
+  lazy val commonSettings = Project.defaultSettings ++ Seq(
+    scalaVersion := "2.10.3"
+  )
 
   lazy val test = Project(
     id = "msg-test",
@@ -11,6 +13,7 @@ object ServerBuild extends Build with Dependencies {
     settings = commonSettings ++ Seq(
       name := "msg-test",
       organization := "net.cherry",
+      resolvers ++= commonResolvers,
       libraryDependencies ++= Seq(
       )
     )
@@ -22,6 +25,7 @@ object ServerBuild extends Build with Dependencies {
     settings = commonSettings ++ Seq(
       name := "msg-infrastructure",
       organization := "net.cherry",
+      resolvers ++= commonResolvers,
       libraryDependencies ++= Seq(
       )
     )
@@ -33,10 +37,13 @@ object ServerBuild extends Build with Dependencies {
     settings = commonSettings ++ Seq(
       name := "msg-domain",
       organization := "net.cherry",
+      resolvers ++= commonResolvers,
       libraryDependencies ++= Seq(
+        sprayJson,
+        scalaRedis
       )
     )
-  ) dependsOn (test % "test")
+  ) dependsOn (infrastructure, test % "test") aggregate(infrastructure)
 
   lazy val server = Project(
     id = "msg-server",
@@ -44,9 +51,13 @@ object ServerBuild extends Build with Dependencies {
     settings = commonSettings ++ Seq(
       name := "msg-server",
       organization := "net.cherry",
+      resolvers ++= commonResolvers,
       libraryDependencies ++= Seq(
         finagleHttp,
-        finagleStream
+        finagleStream,
+        akka,
+        sprayJson,
+        scalaRedis
       )
     )
   ) dependsOn(infrastructure, domain, test % "test") aggregate(infrastructure, domain)
@@ -57,9 +68,12 @@ object ServerBuild extends Build with Dependencies {
     settings = commonSettings ++ Seq(
       name := "msg-stream-server",
       organization := "net.cherry",
+      resolvers ++= commonResolvers,
       libraryDependencies ++= Seq(
         finagleHttp,
-        finagleStream
+        finagleStream,
+        akka,
+        sprayJson
       )
     )
   ) dependsOn(infrastructure, domain, server, test % "test") aggregate(infrastructure, server, domain)
@@ -70,7 +84,14 @@ object ServerBuild extends Build with Dependencies {
     settings = commonSettings ++ Seq(
       name := "msg-api-server",
       organization := "net.cherry",
+      resolvers ++= commonResolvers,
       libraryDependencies ++= Seq(
+        finagleHttp,
+        finagleStream,
+        akka,
+        sprayCan,
+        sprayRouting,
+        sprayJson
       )
     )
   ) dependsOn(infrastructure, domain, server, test % "test") aggregate(infrastructure, server, domain)
@@ -81,7 +102,13 @@ object ServerBuild extends Build with Dependencies {
     settings = commonSettings ++ Seq(
       name := "msg-event-bus",
       organization := "net.cherry",
+      resolvers ++= commonResolvers,
       libraryDependencies ++= Seq(
+        finagleHttp,
+        finagleStream,
+        akka,
+        sprayJson,
+        scalaRedis
       )
     )
   ) dependsOn(infrastructure, domain, server, test % "test") aggregate(infrastructure, server, domain)

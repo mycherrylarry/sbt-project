@@ -1,4 +1,4 @@
-Messenger Backend
+SBT Project
 ===========
 
-A messenger backend system based on Twitter's Finagle
+A sbt sample project based

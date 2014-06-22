@@ -11,3 +11,4 @@ msg-domain/target/*
 msg-event-bus/target/*
 msg-api-server/target/*
 msg-server/target/*
+dump.rdb
