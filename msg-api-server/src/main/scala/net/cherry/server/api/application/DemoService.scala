@@ -1,16 +1,10 @@
 package net.cherry.server.api.application
 
+import scala.collection.mutable.Set
 import akka.actor._
+import spray.can.Http
 import spray.http._
 import HttpMethods._
-import spray.can.Http
-import scala.collection.mutable.Set
-import spray.http.HttpRequest
-import spray.http.HttpResponse
-import spray.http.ChunkedResponseStart
-import akka.util.Timeout
-import scala.concurrent.duration.FiniteDuration
-import java.util.concurrent.TimeUnit
 
 /**
  * Created by le.chang on 2014/06/20.
@@ -18,7 +12,6 @@ import java.util.concurrent.TimeUnit
 class DemoService
   extends Actor with ActorLogging {
 
-  import context.dispatcher
 
   lazy val index = HttpResponse(
     entity = HttpEntity("hhhhh")
@@ -29,11 +22,15 @@ class DemoService
   def receive = {
     case _: Http.Connected => sender ! Http.Register(self)
 
-    case HttpRequest(GET, Uri.Path("/"), _, _, _) =>
+    case HttpRequest(GET, Uri.Path("/"), headers, entity, _) =>
+      println(headers)
+      println(entity)
       sender ! index
 
     case HttpRequest(GET, Uri.Path("/send_to_all"), _, _, _) =>
-      clients.foreach(c=>
+      println("YYYYYYY")
+      println(clients)
+      clients.foreach(c =>
         c ! MessageChunk("send_to_all \r\n")
       )
 
@@ -50,7 +47,9 @@ class DemoService
 
     def receive = {
       case _ =>
-        println("hhhhh")
+        println("stopping")
+        clients.remove(client)
+        context.stop(self)
     }
   }
 
