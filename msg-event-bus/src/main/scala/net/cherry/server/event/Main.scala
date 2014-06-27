@@ -6,9 +6,9 @@ import net.cherry.domain.model.event._
 import net.cherry.domain.model.event.EventTarget
 import net.cherry.server.infrastructure.EventQueue
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Await
-import scala.concurrent.duration.Duration
 import net.cherry.domain.model.conversation.ConversationId
+import scala.concurrent.duration.Duration
+import scala.concurrent.Await
 
 object Main extends App {
 
@@ -26,13 +26,8 @@ object Main extends App {
 
   val eventQueue = EventQueue.ofRedis(redis)
 
-  val y = eventQueue.enqueue(event).flatMap {
-    x =>
-      eventQueue.dequeue.map {
-        result =>
-          println(result)
-      }
-  }
+  val y = eventQueue.enqueue(event)
+
   y onComplete {
     case _ => println("finish")
   }

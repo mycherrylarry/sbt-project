@@ -55,7 +55,7 @@ object ServerBuild extends Build with Dependencies {
       libraryDependencies ++= Seq(
         finagleHttp,
         finagleStream,
-        akka,
+        akkaActor,
         sprayJson,
         scalaRedis
       )
@@ -72,7 +72,7 @@ object ServerBuild extends Build with Dependencies {
       libraryDependencies ++= Seq(
         finagleHttp,
         finagleStream,
-        akka,
+        akkaActor,
         sprayJson
       )
     )
@@ -88,7 +88,7 @@ object ServerBuild extends Build with Dependencies {
       libraryDependencies ++= Seq(
         finagleHttp,
         finagleStream,
-        akka,
+        akkaActor,
         sprayCan,
         sprayRouting,
         sprayJson
@@ -106,7 +106,7 @@ object ServerBuild extends Build with Dependencies {
       libraryDependencies ++= Seq(
         finagleHttp,
         finagleStream,
-        akka,
+        akkaActor,
         sprayJson,
         scalaRedis
       )

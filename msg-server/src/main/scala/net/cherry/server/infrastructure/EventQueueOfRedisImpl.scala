@@ -10,7 +10,7 @@ import serialization._
 
 class EventQueueOfRedisImpl
 (val redisClient: RedisClient)
-  extends EventQueueOfRedis {
+  extends EventQueue {
 
   implicit val parseEvent = Parse[Event] {
     e =>

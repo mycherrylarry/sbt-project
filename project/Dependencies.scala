@@ -7,7 +7,7 @@ trait Dependencies {
   val finagleStream = "com.twitter" %% "finagle-stream" % finagleVersion
 
   val akkaVersion = "2.1.4"
-  val akka = "com.typesafe.akka" %% "akka-actor" % akkaVersion
+  val akkaActor = "com.typesafe.akka" %% "akka-actor" % akkaVersion
 
   val sprayVersion = "1.1.1"
   val sprayCan = "io.spray" % "spray-can" % sprayVersion
