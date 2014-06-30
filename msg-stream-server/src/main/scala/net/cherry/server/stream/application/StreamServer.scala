@@ -1,12 +1,12 @@
 package net.cherry.server.stream.application
 
-import com.twitter.conversions.time._
 import com.twitter.finagle.builder.{Server, ServerBuilder}
 import com.twitter.finagle.stream.Stream
-import com.twitter.util.{Timer, JavaTimer}
 import java.net.InetSocketAddress
-import net.cherry.server.infrastructure.EventPublisher
 import net.cherry.stream.application.service.StreamService
+import akka.actor.ActorSystem
+import net.cherry.server.infrastructure.{EventQueue, EventQueueFetcher}
+import com.redis.RedisClient
 
 /**
  * An example of a streaming server using HTTP Chunking. The Stream
@@ -16,24 +16,23 @@ object StreamServer {
 
   def main(args: Array[String]) {
 
-    val streamService = StreamService()
+    val system = ActorSystem("stream-server")
 
-    val eventPublisher = EventPublisher(streamService)
+    val streamService = StreamService(system)
+
+    val sourceRedis = new RedisClient("localhost", 6380)
+
+    val streamSourceEventQueue = EventQueue.ofRedis(sourceRedis)
+
+    val eventFetcher = EventQueueFetcher(streamSourceEventQueue, streamService.handleEventActor, system)
+
+    eventFetcher.start
 
     val server: Server = ServerBuilder()
       .codec(Stream())
       .bindTo(new InetSocketAddress(8079))
       .name("streamserver")
       .build(streamService)
-
-    val timer = new JavaTimer()
-    def test(timer: Timer) {
-      timer.schedule(1.second.fromNow) {
-        eventPublisher.publish("ping message...") andThen test(timer)
-      }
-    }
-
-    test(timer)
 
   }
 }

@@ -1,52 +1,68 @@
 package net.cherry.stream.application.service
 
-import com.twitter.concurrent.{Broker, Offer}
+import com.twitter.concurrent.Broker
 import com.twitter.finagle.stream.StreamResponse
 import com.twitter.util._
 import org.jboss.netty.buffer.ChannelBuffer
 import org.jboss.netty.buffer.ChannelBuffers.copiedBuffer
 import org.jboss.netty.handler.codec.http.HttpRequest
 import org.jboss.netty.handler.codec.http.{HttpHeaders, DefaultHttpResponse, HttpResponseStatus}
+import akka.actor.{Props, ActorRef, Actor, ActorSystem}
+import scala.collection.mutable.{Set => MSet}
+import net.cherry.domain.model.event.Event
+import spray.json._
+import net.cherry.domain.infrastructure.json.EventJsonProtocol._
 
-class StreamServiceImp extends StreamService {
-  // "tee" messages across all of the registered brokers.
-  val addBroker = new Broker[Broker[ChannelBuffer]]
-  val remBroker = new Broker[Broker[ChannelBuffer]]
-  val messages = new Broker[ChannelBuffer]
+class StreamServiceImp
+(actorSystem: ActorSystem)
+  extends StreamService {
 
-  private[this] def tee(receivers: Set[Broker[ChannelBuffer]]) {
-    Offer.select(
-      addBroker.recv {
-        b => tee(receivers + b)
-      },
-      remBroker.recv {
-        b => tee(receivers - b)
-      },
-      if (receivers.isEmpty) Offer.never
-      else {
-        messages.recv {
-          m =>
-            Future.join(receivers map {
-              _ ! m
-            } toSeq) ensure tee(receivers)
+  val brokers: MSet[Broker[ChannelBuffer]] = MSet()
+
+  private case class Subscriber(subscriber: Broker[ChannelBuffer])
+
+  private class ConnectionActor extends Actor {
+    def receive = {
+      case Subscriber(subscriber) =>
+        println("connection actor")
+        brokers.add(subscriber)
+      case _ =>
+        throw new Exception("EXP")
+    }
+  }
+
+  private class DisconnectionActor extends Actor {
+    def receive = {
+      case Subscriber(subscriber) =>
+        println("disconnection actor")
+        brokers.remove(subscriber)
+      case _ =>
+        throw new Exception("EXP")
+    }
+  }
+
+  case class HandleEventActor() extends Actor {
+    def receive = {
+      case event: Event =>
+        brokers.foreach {
+          broker =>
+            val eventJson = event.toJson + "\r\n"
+            broker.send(copiedBuffer(eventJson.getBytes())).sync()
         }
-      }
-    )
+    }
   }
 
-  // start the process.
-  tee(Set())
+  val handleEventActor: ActorRef = actorSystem.actorOf(Props(HandleEventActor), "stream-handle-event-actor")
 
-  // callback function
-  def handleEvent(event: String): Offer[Unit] = {
-    messages.send(copiedBuffer((event + " \r\n").getBytes()))
-  }
+  private val connectionActor: ActorRef = actorSystem.actorOf(Props(new ConnectionActor), "stream-connection-actor")
+
+  private val disconnectionActor: ActorRef = actorSystem.actorOf(Props(new DisconnectionActor), "stream-disconnection-actor")
 
   def apply(request: HttpRequest): Future[StreamResponse] = {
     val result = Future {
       val subscriber = new Broker[ChannelBuffer]
 
-      addBroker ! subscriber
+      connectionActor ! Subscriber(subscriber)
 
       // \r\n is needed when sending message
       subscriber.send(copiedBuffer("you've connected to the server \r\n".getBytes())).sync()
@@ -67,7 +83,8 @@ class StreamServiceImp extends StreamService {
         def error = new Broker[Throwable].recv
 
         def release() = {
-          remBroker ! subscriber
+          disconnectionActor ! Subscriber(subscriber)
+
           // sink any existing messages, so they
           // don't hold up the upstream.
           subscriber.recv foreach {
