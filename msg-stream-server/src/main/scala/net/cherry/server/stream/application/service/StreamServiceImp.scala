@@ -8,16 +8,20 @@ import org.jboss.netty.buffer.ChannelBuffers.copiedBuffer
 import org.jboss.netty.handler.codec.http.HttpRequest
 import org.jboss.netty.handler.codec.http.{HttpHeaders, DefaultHttpResponse, HttpResponseStatus}
 import akka.actor.{Props, ActorRef, Actor, ActorSystem}
-import scala.collection.mutable.{Set => MSet}
+import scala.collection.mutable.{HashMap, Set => MSet}
 import net.cherry.domain.model.event.Event
 import spray.json._
 import net.cherry.domain.infrastructure.json.EventJsonProtocol._
+import net.cherry.domain.model.user.UserId
+import net.cherry.infrastructure.uuid.UUID
 
 class StreamServiceImp
 (actorSystem: ActorSystem)
   extends StreamService {
 
-  val brokers: MSet[Broker[ChannelBuffer]] = MSet()
+  val brokers: HashMap[UserId, MSet[Broker[ChannelBuffer]]] = HashMap()
+
+  val id = UserId(UUID("key"))
 
   private case class Subscriber(subscriber: Broker[ChannelBuffer])
 
@@ -25,7 +29,11 @@ class StreamServiceImp
     def receive = {
       case Subscriber(subscriber) =>
         println("connection actor")
-        brokers.add(subscriber)
+        subscriber.send(copiedBuffer("you've connected to the server \r\n".getBytes())).sync()
+        if (brokers.contains(id))
+          brokers.get(id).map(_.add(subscriber))
+        else
+          brokers.put(id, MSet(subscriber))
       case _ =>
         throw new Exception("EXP")
     }
@@ -35,19 +43,23 @@ class StreamServiceImp
     def receive = {
       case Subscriber(subscriber) =>
         println("disconnection actor")
-        brokers.remove(subscriber)
+        if (brokers.contains(id))
+          brokers.get(id).map(_.remove(subscriber))
       case _ =>
         throw new Exception("EXP")
     }
   }
 
-  case class HandleEventActor() extends Actor {
+  private case class HandleEventActor() extends Actor {
     def receive = {
       case event: Event =>
-        brokers.foreach {
-          broker =>
-            val eventJson = event.toJson + "\r\n"
-            broker.send(copiedBuffer(eventJson.getBytes())).sync()
+        brokers.get(id).map {
+          brokerSet =>
+            brokerSet.foreach {
+              broker =>
+                val eventJson = event.toJson + "\r\n"
+                broker.send(copiedBuffer(eventJson.getBytes())).sync()
+            }
         }
     }
   }
@@ -63,9 +75,6 @@ class StreamServiceImp
       val subscriber = new Broker[ChannelBuffer]
 
       connectionActor ! Subscriber(subscriber)
-
-      // \r\n is needed when sending message
-      subscriber.send(copiedBuffer("you've connected to the server \r\n".getBytes())).sync()
 
       new StreamResponse {
         val httpResponse = {
