@@ -2,14 +2,15 @@ package net.cherry.stream.application.service
 
 import com.twitter.finagle.Service
 import com.twitter.finagle.stream.StreamResponse
-import net.cherry.server.infrastructure.EventHandler
 import org.jboss.netty.handler.codec.http.HttpRequest
+import akka.actor.{ActorRef, ActorSystem}
 
-trait StreamService extends Service[HttpRequest, StreamResponse] with EventHandler {
-
+trait StreamService extends Service[HttpRequest, StreamResponse] {
+  // Call back actor
+  val handleEventActor: ActorRef
 }
 
 object StreamService {
-  def apply(): StreamService =
-    new StreamServiceImp()
+  def apply(actorSystem: ActorSystem): StreamService =
+    new StreamServiceImp(actorSystem)
 }

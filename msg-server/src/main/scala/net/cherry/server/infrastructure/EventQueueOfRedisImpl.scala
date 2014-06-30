@@ -19,12 +19,10 @@ class EventQueueOfRedisImpl
   }
 
   def enqueue(event: Event): Future[Unit] = future {
-    println("enqueue")
     redisClient.lpush("event-json", event.toJson)
   }
 
   def dequeue: Future[Option[Event]] = future {
-    println("dequeue")
     redisClient.rpop[Event]("event-json")
   }
 }
